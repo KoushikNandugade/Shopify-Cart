@@ -1,0 +1,23 @@
+{
+  "name": "shopkart-auth",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "node --env-file=.env --watch index.js",
+    "start": "node --env-file=.env index.js",
+    "test": "node --env-file=.env --test test/*.test.js",
+    "seed": "node --env-file=.env scripts/seed.js"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.7",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.19.0",
+    "razorpay": "^2.9.8"
+  }
+}

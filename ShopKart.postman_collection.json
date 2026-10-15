@@ -1,0 +1,852 @@
+{
+  "info": {
+    "name": "ShopKart Lab 01",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Run in order with cookies enabled. Registration expects a new email; change it if already used."
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000"
+    },
+    {
+      "key": "productId",
+      "value": "530000000000000000000001"
+    },
+    {
+      "key": "shopKartOrderId",
+      "value": ""
+    },
+    {
+      "key": "razorpayOrderId",
+      "value": ""
+    },
+    {
+      "key": "razorpayPaymentId",
+      "value": ""
+    },
+    {
+      "key": "razorpaySignature",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Register",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/customers/register",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"fullName\": \"John Doe\",\n  \"email\": \"john@gmail.com\",\n  \"password\": \"john123\",\n  \"phone\": \"9876543210\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/customers/login",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"john@gmail.com\",\n  \"password\": \"john123\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "My profile",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/customers/me",
+        "header": []
+      }
+    },
+    {
+      "name": "Change password (bonus)",
+      "request": {
+        "method": "PATCH",
+        "url": "{{baseUrl}}/customers/change-password",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"oldPassword\": \"john123\",\n  \"newPassword\": \"newpass123\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Login with new password",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/customers/login",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"john@gmail.com\",\n  \"password\": \"newpass123\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Logout",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/customers/logout",
+        "header": []
+      }
+    },
+    {
+      "name": "Profile after logout (expect 401)",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/customers/me",
+        "header": []
+      }
+    },
+    {
+      "name": "Lab 03 - Products",
+      "item": [
+        {
+          "name": "Create product",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/products",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Mechanical Keyboard\",\n  \"description\": \"RGB mechanical keyboard with blue switches.\",\n  \"price\": 2999,\n  \"category\": \"Electronics\",\n  \"image\": \"/product-images/keyboard.svg\",\n  \"stock\": 10\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Created product\", () => pm.response.to.have.status(201));",
+                  "if (pm.response.code === 201) pm.collectionVariables.set(\"productId\", pm.response.json().product._id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "All products",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/products",
+            "header": []
+          }
+        },
+        {
+          "name": "Search products",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/products?search=keyboard",
+            "header": []
+          }
+        },
+        {
+          "name": "Filter products",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/products?category=Electronics",
+            "header": []
+          }
+        },
+        {
+          "name": "Combined search and category",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/products?search=keyboard&category=Electronics",
+            "header": []
+          }
+        },
+        {
+          "name": "Sort price ascending",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/products?sort=price_asc",
+            "header": []
+          }
+        },
+        {
+          "name": "Sort price descending",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/products?sort=price_desc",
+            "header": []
+          }
+        },
+        {
+          "name": "Single product",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/products/{{productId}}",
+            "header": []
+          }
+        },
+        {
+          "name": "Invalid product ID (400)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/products/invalid",
+            "header": []
+          }
+        },
+        {
+          "name": "Missing product (404)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/products/000000000000000000000000",
+            "header": []
+          }
+        }
+      ]
+    },
+    {
+      "name": "Lab 04 - Wishlist (login first; run in order)",
+      "item": [
+        {
+          "name": "Add product",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/wishlist/{{productId}}",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected status 201\", () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Add duplicate (409)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/wishlist/{{productId}}",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected status 409\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "My wishlist",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/wishlist",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Invalid ID (400)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/wishlist/invalid",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected status 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Missing product (404)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/wishlist/000000000000000000000000",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected status 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Remove product",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/wishlist/{{productId}}",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Remove again (404)",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/wishlist/{{productId}}",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected status 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Lab 05 - Cart (login first; fresh cart; stock at least 3)",
+      "item": [
+        {
+          "name": "Add product (quantity 1)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/cart/{{productId}}",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Add again (quantity 2)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/cart/{{productId}}",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "My cart",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/cart",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Set quantity to 3",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/cart/{{productId}}",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Quantity above stock (400)",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/cart/{{productId}}",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": 999999999\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected status 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Quantity zero (400)",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/cart/{{productId}}",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": 0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected status 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Invalid ID (400)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/cart/invalid",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected status 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Missing product (404)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/cart/000000000000000000000000",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected status 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Remove item",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/cart/{{productId}}",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Remove again (404)",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/cart/{{productId}}",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected status 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Lab 06 - Checkout (Test Mode keys + login + nonempty cart required)",
+      "item": [
+        {
+          "name": "Create Test Mode payment order",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/orders/create-payment-order",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shippingAddress\": {\n    \"fullName\": \"Aarav Sharma\",\n    \"phone\": \"9876543210\",\n    \"addressLine1\": \"22 MG Road\",\n    \"city\": \"Bengaluru\",\n    \"state\": \"Karnataka\",\n    \"pincode\": \"560001\"\n  },\n  \"totalAmount\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected status 201\", () => pm.response.to.have.status(201));",
+                  "if (pm.response.code === 201) { const d = pm.response.json(); pm.collectionVariables.set(\"shopKartOrderId\", d.shopKartOrderId); pm.collectionVariables.set(\"razorpayOrderId\", d.razorpayOrderId); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cart before payment (must remain)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/cart",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Invalid signature (400; cart unchanged)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/orders/verify-payment",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shopKartOrderId\": \"{{shopKartOrderId}}\",\n  \"razorpay_order_id\": \"{{razorpayOrderId}}\",\n  \"razorpay_payment_id\": \"pay_invalid\",\n  \"razorpay_signature\": \"0000000000000000000000000000000000000000000000000000000000000000\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected status 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Verify actual Razorpay Test Checkout response",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/orders/verify-payment",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shopKartOrderId\": \"{{shopKartOrderId}}\",\n  \"razorpay_order_id\": \"{{razorpayOrderId}}\",\n  \"razorpay_payment_id\": \"{{razorpayPaymentId}}\",\n  \"razorpay_signature\": \"{{razorpaySignature}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cart after verified payment",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/cart",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "My orders",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/orders",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Order details",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/orders/{{shopKartOrderId}}",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Invalid order ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/orders/invalid",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected status 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Missing order",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/orders/000000000000000000000000",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected status 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
